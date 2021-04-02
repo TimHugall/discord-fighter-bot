@@ -9,7 +9,7 @@ A Serverless Discord bot to organise games and designate roles for Discord fight
 
 1. Create two Discord bot tokens
 2. Fork the repo
-3. Create two environments in repo: _dev_ and _prod_
+3. Create two environments in repo: _dev_ and _prod_. Set up prod for continuous delivery rather than deployment; there's a step to destroy the dev environment after prod deploys. 
 4. Create the following repository secrets:
     - `AWS_ACCESS_KEY_ID`
     - `AWS_REGION`
@@ -21,6 +21,7 @@ A Serverless Discord bot to organise games and designate roles for Discord fight
 chars = [
     {'Character': 'Role Name on Server', 'Terms': ['serve']},
     {'Character': 'Another Role Name on Server', 'Terms': ['another', 'server']},
+]
 ```
 `Terms` is a list of search terms that can be entered to obtain a role. Order your list correctly to ensure that roles are evaluated in the order you want. 
 6. Edit `backend.tf` and `versions.tf` to meet your requirements. 
