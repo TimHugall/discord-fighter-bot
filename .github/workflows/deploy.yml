@@ -1,0 +1,100 @@
+name: Package Function and Deploy via Terraform
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - 'README.md'
+jobs:
+  deploy_dev:
+    environment:
+      name: dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: '0.14.2'
+      - name: Create Python Package
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install setuptools
+          cd src
+          echo $CHARS > role_dict.py
+          bash build.sh
+        env:
+          CHARS: ${{ secrets.CHARS }}
+      - name: Deploy
+        run: |
+          terraform init
+          terraform apply -auto-approve -var-file=dev.tfvars -var bot_token=$DISCORD_BOT_TOKEN
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DEV_DISCORD_BOT_TOKEN }}
+  deploy_prod:
+    needs: deploy_dev
+    environment:
+      name: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: '0.14.2'
+      - name: Create Python Package
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install setuptools
+          cd src
+          echo $CHARS > role_dict.py
+          bash build.sh
+        env:
+          CHARS: ${{ secrets.CHARS }}
+      - name: Deploy
+        run: |
+          sed -i 's/dev/prod/g' backend.tf
+          terraform init
+          terraform apply -auto-approve -var-file=prod.tfvars -var bot_token=$DISCORD_BOT_TOKEN
+          export HASH=$(terraform output source_code_hash)
+          echo "::set-output name=source_code_hash::$HASH"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DISCORD_BOT_TOKEN: ${{ secrets.PROD_DISCORD_BOT_TOKEN }}
+    outputs:
+      source_code_hash: $HASH  
+  destroy_dev:
+    needs: deploy_prod
+    environment: dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: '0.14.2'
+      - name: Destroy Dev Environment
+        run: |
+          export HASH=${{needs.deploy_prod.outputs.source_code_hash}}
+          terraform init
+          terraform destroy -auto-approve -var-file=dev.tfvars -var source_code_hash=$HASH -var bot_token=$DISCORD_BOT_TOKEN
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DEV_DISCORD_BOT_TOKEN }}

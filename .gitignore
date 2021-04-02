@@ -1,0 +1,4 @@
+.python-version
+src/package
+src/*.zip
+.terraform*
