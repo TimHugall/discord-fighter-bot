@@ -53,7 +53,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: '0.14.2'
+          terraform_version: 0.14.8
       - name: Create Python Package
         run: |
           python3 -m pip install --upgrade pip
@@ -87,7 +87,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: '0.14.2'
+          terraform_version: 0.14.8
       - name: Destroy Dev Environment
         run: |
           export HASH=${{needs.deploy_prod.outputs.source_code_hash}}
