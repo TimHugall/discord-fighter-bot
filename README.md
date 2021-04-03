@@ -29,6 +29,7 @@ chars = [
 # To Do
 - Code cleanup
 - More exception handling
+- Coverage
 
 ## Improvements / Limitations
 - By design, this function runs every ~15 minutes on a schedule, storing queue data in DynamoDB in between runs. There is a small gap between invocations during which the bot is down. Potentially its timeout / schedule can be tweaked to minimise this.
