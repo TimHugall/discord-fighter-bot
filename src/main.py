@@ -133,11 +133,11 @@ def lambda_handler(event, context):
     async def on_message(message):
         # if the message has the correct syntax, evaluate further
         if message.content.startswith(help_commands):
-            mm_help_string = 'Commands: \n- `.mm` adds you to the matchmaking queue.'\
-                'You can optionally specify a timeout in minutes with `.mm mins`; for example, `.mm 120`.'\
-                '\nThe timeout can be between 5 and 120 minutes. If no timeout is specified,'\
-                'the timeout will default to 30 minutes. If you re-enter this command while still in the queue,'\
-                'your timeout will be changed, not incremented. You can remove yourself from the queue, however,'\
+            mm_help_string = 'Commands: \n- `.mm` adds you to the matchmaking queue. '\
+                'You can optionally specify a timeout in minutes with `.mm mins`; for example, `.mm 120`. '\
+                '\nThe timeout can be between 5 and 120 minutes. If no timeout is specified, '\
+                'the timeout will default to 30 minutes. If you re-enter this command while still in the queue, '\
+                'your timeout will be changed, not incremented. You can remove yourself from the queue, however, '\
                 'with `.mm cancel`. \n'
             role_help_string = '- `.role role` gives you the specified role if you don\'t have it, or removes it if you do. \n'
             generic_help_string = ' -`.help` displays this message again. '
